@@ -1,5 +1,6 @@
 package com.vp;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -27,6 +28,12 @@ public class FirstSimpleBehavior extends AbstractBehavior<String> {
                 .onMessageEquals("who are you?",() -> {
                     System.out.println("My path is : " + getContext().getSelf().path());
                     return  this;
+                })
+                .onMessageEquals("create a child", ()->{
+                    ActorRef<String> secondActor = getContext()
+                            .spawn(FirstSimpleBehavior.create(), "secondActor");
+                    secondActor.tell("who are you?");
+                    return this;
                 })
                 .onAnyMessage(message -> {
                     System.out.println("I received the message : " + message);
