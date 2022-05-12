@@ -11,7 +11,7 @@ public class Main {
 //        actorSystem.tell("who are you?");
 //        actorSystem.tell("create a child");
 
-        ActorSystem<String> bigPrimes = ActorSystem.create(ManagerBehavior.create(), "BigPrimes");
-        bigPrimes.tell("start");
+        ActorSystem<ManagerBehavior.Command> bigPrimes = ActorSystem.create(ManagerBehavior.create(), "BigPrimes");
+        bigPrimes.tell(new ManagerBehavior.InstructionCommmand("start"));
     }
 }
