@@ -22,12 +22,19 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
         public static final long SerialVersionUID = 1L;
         private String message;
 
-        public InstructionCommmand(String message) {
+        private ActorRef<SortedSet<BigInteger>>  sender;
+
+        public InstructionCommmand(String message, ActorRef<SortedSet<BigInteger>>  sender) {
             this.message = message;
+            this.sender =sender;
         }
 
         public String getMessage() {
             return message;
+        }
+
+        public ActorRef<SortedSet<BigInteger>> getSender() {
+            return sender;
         }
     }
 
@@ -65,11 +72,13 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
     }
 
     private SortedSet<BigInteger> primes = new TreeSet<>();
+    private ActorRef<SortedSet<BigInteger>> sender;
 
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
                 .onMessage(InstructionCommmand.class, command -> {
+                    this.sender = command.getSender();
                     if (command.getMessage().equals("start")) {
                         for (int i = 0; i < 20; i++) {
                             ActorRef<WorkerBehavior.Command> worker = getContext().spawn(WorkerBehavior.create(), "Worker" + i);
@@ -81,8 +90,8 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
                 .onMessage(ResultCommand.class, command -> {
                     primes.add(command.getPrime());
                     System.out.println("I have received " + primes.size() + " prime numbers");
-                    if(primes.size() == 20){
-                        primes.forEach(System.out::println);
+                    if(primes.size() ==20){
+                        this.sender.tell(primes);
                     }
                     return Behaviors.same();
                 })
